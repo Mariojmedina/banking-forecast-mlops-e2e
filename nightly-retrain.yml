@@ -1,0 +1,22 @@
+name: Nightly Retrain
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # every day at 03:00 UTC
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - name: Run nightly retrain
+        run: |
+          make train
+      - name: Push retrained model
+        run: |
+          echo "Retrained model artifacts would be pushed to remote storage here"
