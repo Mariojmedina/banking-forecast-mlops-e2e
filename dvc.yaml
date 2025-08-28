@@ -1,33 +1,20 @@
 stages:
   ingest:
-    cmd: python src/features/ingest.py
+    # Generate a synthetic Parquet file of processed features.  In a
+    # production pipeline this stage would perform feature engineering on
+    # raw data and write a Parquet dataset.
+    cmd: python -m src.features.ingest
     deps:
       - src/features/ingest.py
     outs:
-      - data/raw/data.csv
-
-  validate:
-    cmd: python src/features/validate_data.py
-    deps:
-      - data/raw/data.csv
-      - expectations/
-    outs:
-      - data/processed/validated.csv
+      - data/processed/features.parquet
 
   train:
-    cmd: python src/training/train_model.py
+    # Train a simple XGBoost model and log it with MLflow.  This stage
+    # depends on the processed features produced by the ingest stage.
+    cmd: python -m src.training.train
     deps:
-      - data/processed/validated.csv
-      - src/training/train_model.py
+      - src/training/train.py
+      - data/processed/features.parquet
     outs:
-      - models/latest_model.pkl
-    metrics:
-      - models/metrics.json
-
-  evaluate:
-    cmd: python src/evaluation/evaluate.py
-    deps:
-      - models/latest_model.pkl
-      - src/evaluation/evaluate.py
-    outs:
-      - models/evaluation.json
+      - models/model.pkl
